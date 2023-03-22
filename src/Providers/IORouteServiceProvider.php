@@ -339,7 +339,7 @@ class IORouteServiceProvider extends RouteServiceProvider
             'IO\Controllers\StaticPagesController@redirectTermsAndConditions'
         );
 
-        // WISH LIST
+        // WISH LIST & WISH LIST DETAIL
         $this->registerRedirectedRoute(
             $router,
             RouteConfig::WISH_LIST,
@@ -347,6 +347,8 @@ class IORouteServiceProvider extends RouteServiceProvider
             'IO\Controllers\ItemWishListController@showWishList',
             'IO\Controllers\ItemWishListController@redirect'
         );
+        $router->get('wishlist/{wishlistId}', 'IO\Controllers\ItemWishListController@showWishListDetail')->where('wishlistId', '[0-9]+');
+        $router->get('wishlist/{accessCode}', 'IO\Controllers\ItemWishListController@showWishListByAccessCode');
 
         // ITEM ROUTES
         if (RouteConfig::isActive(RouteConfig::ITEM)) {

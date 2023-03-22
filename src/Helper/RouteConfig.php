@@ -71,7 +71,7 @@ class RouteConfig
     /** @var string Represents the terms and conditions route */
     const TERMS_CONDITIONS = "gtc";
     /** @var string Represents the wish list route */
-    const WISH_LIST = "wish-list";
+    const WISH_LIST = "wishlist";
     /** @var string Represents the 404 route */
     const PAGE_NOT_FOUND = "page-not-found";
     /** @var string Represents the tags route */

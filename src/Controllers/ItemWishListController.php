@@ -1,8 +1,6 @@
 <?php //strict
 namespace IO\Controllers;
-
 use IO\Helper\RouteConfig;
-
 /**
  * Class WishListController
  * @package IO\Controllers
@@ -24,6 +22,28 @@ class ItemWishListController extends LayoutController
 		);
     }
 
+    public function showWishListDetail( int $wishlistId ): string
+    {
+        return $this->renderTemplate(
+            "tpl.wish-list.detail",
+            [
+                "wishlistId" => $wishlistId
+            ],
+            true
+        );
+    }
+
+    public function showWishListByAccessCode( $accessCode ): string
+    {
+        return $this->renderTemplate(
+            "tpl.wish-list.access-code",
+            [
+                "accessCode" => $accessCode
+            ],
+            true
+        );
+    }
+ 
     public function redirect()
     {
         if(!is_null($categoryByUrl = $this->checkForExistingCategory())) {
