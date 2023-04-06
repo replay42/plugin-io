@@ -347,8 +347,9 @@ class IORouteServiceProvider extends RouteServiceProvider
             'IO\Controllers\ItemWishListController@showWishList',
             'IO\Controllers\ItemWishListController@redirect'
         );
+        // Custom Wunschliste
         $router->get('wishlist/{wishlistId}', 'IO\Controllers\ItemWishListController@showWishListDetail')->where('wishlistId', '[0-9]+');
-        $router->get('wishlist/{accessCode}', 'IO\Controllers\ItemWishListController@showWishListByAccessCode');
+        $router->get('wunschliste/{accessCode}', 'IO\Controllers\ItemWishListController@showWishListByAccessCode');
 
         // ITEM ROUTES
         if (RouteConfig::isActive(RouteConfig::ITEM)) {

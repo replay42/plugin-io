@@ -16,7 +16,7 @@ class ItemWishListController extends LayoutController
         return $this->renderTemplate(
 			"tpl.wish-list",
 			[
-                "object" => ""
+                "listOverview" => true
             ],
             true
 		);
