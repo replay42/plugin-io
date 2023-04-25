@@ -1,5 +1,5 @@
 <?php
-
+ 
 namespace IO\Api\Resources;
 
 use IO\Services\ItemSearchAutocompleteService;

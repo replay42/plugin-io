@@ -118,7 +118,7 @@ class ItemSearchAutocompleteService
         return $results;
     }
 
-    /**
+    /** 
      * Transform the item search result into a flatter format
      * @param array $itemSearchResult Raw item search result
      * @return array
