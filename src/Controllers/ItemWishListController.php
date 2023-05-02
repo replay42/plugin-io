@@ -60,7 +60,7 @@ class ItemWishListController extends LayoutController
         return $this->renderTemplate(
             "tpl.wish-list.detail",
             $templateData,
-            true
+            false
         );
     }
 
@@ -87,7 +87,7 @@ class ItemWishListController extends LayoutController
         return $this->renderTemplate(
             "tpl.wish-list.access-code",
             $templateData,
-            true
+            false
         );
     }
 
