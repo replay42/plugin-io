@@ -201,15 +201,6 @@ abstract class LayoutController extends Controller
 
         $templateData = ArrayHelper::toArray($templateData);
 
-        $this->getLogger(__CLASS__)->error(
-            "Rendering Template IO now!",
-            [
-                "templateKey" => $templateContainer->getTemplateKey(),
-                "template" => $templateContainer->getTemplate(),
-                "data" => $templateData
-            ]
-        );
-
         // Render the received plugin
         try {
             return $this->twig->render(

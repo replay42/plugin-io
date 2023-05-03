@@ -51,10 +51,6 @@ class ItemWishListController extends LayoutController
 
         $templateData['listAccessible'] = true;
         $templateData['isPublic'] = false;
-
-        // Get variation data and enrich list
-        $list = $this->enrichListWithItemData($list);
-
         $templateData['wishlistData'] = $list;
 
         return $this->renderTemplate(
@@ -79,9 +75,6 @@ class ItemWishListController extends LayoutController
         $templateData = [];
         $templateData['listAccessible'] = true;
         $templateData['isPublic'] = true;
-
-        // Get variation data and enrich list
-        $list = $this->enrichListWithItemData($list);
         $templateData['wishlistData'] = $list;
 
         return $this->renderTemplate(
@@ -91,45 +84,7 @@ class ItemWishListController extends LayoutController
         );
     }
 
-    public function enrichListWithItemData($list)
-    {
-        $variationIds = [];
-        foreach ($list['wishlistItems'] as $item) {
-            if (is_array($item))
-                $variationIds[] = $item['variationId'];
-            else
-                $variationIds[] = $item->variationId;
-        }
-
-        if (count($variationIds) > 0) {
-            /** @var ItemSearchService $itemSearchService */
-            $itemSearchService = pluginApp(ItemSearchService::class);
-            $searchFactory = BasketItems::getSearchFactory(
-                [
-                    'variationIds' => $variationIds,
-                    'quantities' => 1,
-                    'itemsPerPage' => count($variationIds)
-                ]
-            );
-            $searchResults = $itemSearchService->getResults($searchFactory);
-            $variationData = [];
-            foreach ($list['wishlistItems'] as $key => $item) {
-                $variation = array_filter(
-                    $searchResults['documents'],
-                    function ($document) use ($item) {
-                        return $document['id'] == $item->variationId;
-                    }
-                );
-                if (count($variation) == 1) {
-                    $tmp = array_pop($variation);
-                    $variationData[] = $tmp['data'];
-                }
-            }
-            $list['variationData'] = $variationData;
-        }
-
-        return $list;
-    }
+    
 
     public function listNotFound()
     {
