@@ -2,6 +2,10 @@
 
 namespace IO\Services;
 
+use IO\Services\NotificationService;
+use IO\Services\CategoryService;
+
+use Plenty\Plugin\Log\Loggable;
 use Illuminate\Database\Eloquent\Collection;
 use Plenty\Modules\Authorization\Services\AuthHelper;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
@@ -21,6 +25,8 @@ use Plenty\Modules\Order\Coupon\Campaign\Models\CouponCampaign;
  */
 class CouponService
 {
+    use Loggable;
+
     /**
      * @var CouponCampaignRepositoryContract
      */
@@ -72,6 +78,34 @@ class CouponService
      */
     public function setCoupon(string $couponCode)
     {
+        // June 23rd, 2023 / RS BK
+        $shippingCountryId = 1;
+        $basket = $this->basketRepository->load();
+        $campaign = $this->couponCampaignRepository->findByCouponCode($couponCode);
+
+        if(!is_null($basket))
+            $shippingCountryId = $basket->shippingCountryId;
+        
+
+
+        $this->getLogger(__CLASS__)->error(
+            'DEBUG_SET_COUPON_2',
+            [
+                'basket' => $basket,
+                'shippingCountryId' => $basket->shippingCountryId,
+                'campaign' => $campaign,
+                'deniedDiscountType' => CouponCampaign::DISCOUNT_TYPE_SHIPPING
+            ]
+        );
+        if ($campaign instanceof CouponCampaign) {
+            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && $shippingCountryId != 1) {
+                // free intl. shipping
+                // not allowed - remove coupon!
+                throw new \Exception("Shipping discount only possible with German delivery address.");
+            }
+        }
+        // ./
+        
         return $this->basketRepository->setCouponCode($couponCode);
     }
 
@@ -111,10 +145,16 @@ class CouponService
                 }
                 $basket['couponCampaignType'] = $campaign->couponType;
             }
+
+            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && $basket['shippingCountryId'] != 1
+            ) {
+                // free intl. shipping, not allowed, remove coupon!
+                $basket = $this->basketRepository->removeCouponCode()->toArray();
+            }
         }
         return $basket;
     }
-
+ 
     /**
      * Validate the basket for the coupon, and remove the coupon if invalid
      * @param Basket $basket The basket
@@ -129,10 +169,10 @@ class CouponService
             if ($campaign instanceof CouponCampaign) {
                 if ($this->isCouponMinimalOrderOnDelete($basket, $basketItem, $campaign)) {
                     // Check if the minimal order value is not met
-                    $this->removeCoupon(CouponService::BELOW_MINIMAL_ORDER_VALUE);
+                    $this->removeCoupon(self::BELOW_MINIMAL_ORDER_VALUE);
                 } elseif ($this->isCouponValidForBasketItems($basket, $basketItem, $campaign)) {
                     // Check if the coupon is still valid with the new basket (only coupon item removed?)
-                    $this->removeCoupon(CouponService::NO_VALID_ITEM_IN_BASKET);
+                    $this->removeCoupon(self::NO_VALID_ITEM_IN_BASKET);
                 }
             }
         }
@@ -154,7 +194,7 @@ class CouponService
                 $this->isCouponMinimalOrderOnUpdate($basket, $data, $basketItem, $campaign)
             ) {
                 // Check if the minimal order value is not met
-                $this->removeCoupon(CouponService::BELOW_MINIMAL_ORDER_VALUE);
+                $this->removeCoupon(self::BELOW_MINIMAL_ORDER_VALUE);
             }
         }
     }

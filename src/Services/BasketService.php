@@ -4,6 +4,9 @@ namespace IO\Services;
 
 use IO\Constants\LogLevel;
 use IO\Helper\Utils;
+use IO\Services\CouponService;
+use IO\Services\ItemWishListService;
+use IO\Services\NotificationService;
 use Plenty\Modules\Accounting\Contracts\DetermineShopCountryContract;
 use Plenty\Modules\Accounting\Vat\Contracts\VatInitContract;
 use Plenty\Modules\Accounting\Vat\Models\VatRate;
@@ -22,6 +25,7 @@ use Plenty\Modules\Item\Variation\Models\Variation;
 use Plenty\Modules\Item\VariationDescription\Contracts\VariationDescriptionRepositoryContract;
 use Plenty\Modules\Item\VariationDescription\Models\VariationDescription;
 use Plenty\Modules\Order\Coupon\Campaign\Contracts\CouponCampaignRepositoryContract;
+use Plenty\Modules\Order\Coupon\Campaign\Models\CouponCampaign;
 use Plenty\Modules\Order\Shipping\Contracts\EUCountryCodesServiceContract;
 use Plenty\Modules\Webshop\Contracts\CheckoutRepositoryContract;
 use Plenty\Modules\Webshop\Contracts\ContactRepositoryContract;
@@ -182,7 +186,6 @@ class BasketService
         }
 
         $couponValidation = $order->couponCodeValidation;
-
         if (!is_null($couponValidation)) {
 
             /** @var CouponCampaignRepositoryContract $campaignRepository */
@@ -194,8 +197,18 @@ class BasketService
             }
 
             if ($this->couponService->effectsOnShippingCosts($campaign)) {
-                $basket['shippingAmountNet'] -= $couponValidation->shippingDiscountNet;
-                $basket['shippingAmount'] -= $couponValidation->shippingDiscount;
+                // June 23rd, 2023 / RS BK 
+                if($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING &&
+                   $basket['shippingCountryId'] != 1)
+                   {
+                        // free intl. shipping
+                        // not allowed - remove coupon!
+                        $this->couponService->removeCoupon(); // BK
+                   } else {
+                    // original code
+                    $basket['shippingAmountNet'] -= $couponValidation->shippingDiscountNet;
+                    $basket['shippingAmount'] -= $couponValidation->shippingDiscount;
+                }
             }
         }
 
