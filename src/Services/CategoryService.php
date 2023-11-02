@@ -213,7 +213,7 @@ class CategoryService
         }
 
         return null;
-    }
+    } 
 
     /**
      * Get child categories of a given category referenced by id
@@ -240,6 +240,11 @@ class CategoryService
                 return null;
             }
         );
+
+        // Sort by category position
+        $children = $children->sort(function ($category, $key) {
+            return $category->details[0]->position ?? 0;
+        });
 
         return $children;
     }
