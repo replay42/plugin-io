@@ -240,7 +240,10 @@ class CategoryService
                 return null;
             }
         );
-
+        
+        if(is_null($children))
+            return $children;
+        
         // Sort by category position
         $children = $children->sort(function ($category, $key) {
             return $category->details[0]->position ?? 0;
