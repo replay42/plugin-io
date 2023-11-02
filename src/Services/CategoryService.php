@@ -241,9 +241,9 @@ class CategoryService
             }
         );
         
-        if(is_null($children))
+        if(is_null($children) || $children === null)
             return $children;
-        
+
         // Sort by category position
         $children = $children->sort(function ($category, $key) {
             return $category->details[0]->position ?? 0;
