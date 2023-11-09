@@ -246,7 +246,7 @@ class CategoryService
 
         // Sort by category position
         $children = $children->sort(function ($category, $key) {
-            return $category->details[0]->position ?? 0;
+            return intval($category->details[0]->position) ?? 0;
         });
 
         return $children;
