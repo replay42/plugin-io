@@ -18,6 +18,8 @@ use Plenty\Modules\Webshop\Contracts\ContactRepositoryContract;
 use Plenty\Modules\Webshop\Contracts\WebstoreConfigurationRepositoryContract;
 use Plenty\Modules\Webshop\ItemSearch\Helpers\LoadResultFields;
 use Plenty\Modules\Webshop\ItemSearch\Helpers\ResultFieldTemplate;
+use Plenty\Plugin\Log\Loggable;
+
 
 /**
  * Class CategoryService
@@ -29,6 +31,7 @@ use Plenty\Modules\Webshop\ItemSearch\Helpers\ResultFieldTemplate;
  */
 class CategoryService
 {
+    use Loggable;
     use MemoryCache;
     use LoadResultFields;
 
@@ -234,21 +237,23 @@ class CategoryService
             "categoryChildren.$categoryId.$lang",
             function () use ($categoryId, $lang) {
                 if ($categoryId > 0) {
-                    return $this->categoryRepository->getChildren($categoryId, $lang);
+                    $children = $this->categoryRepository->getChildren($categoryId, $lang);
+
+                    if($children !== null)
+                    {   
+                        // sort
+                        $children = $children->sort(function ($categoryA, $categoryB) {
+                            $posA = intval($categoryA->details[0]->position);
+                            $posB = intval($categoryB->details[0]->position);
+                            return $posA - $posB;
+                        });
+                    }
+                    return $children;
                 }
 
                 return null;
             }
         );
-        
-        if(is_null($children) || $children === null)
-            return $children;
-
-        // Sort by category position
-        $children = $children->sort(function ($category, $key) {
-            return intval($category->details[0]->position) ?? 0;
-        });
-
         return $children;
     }
 
