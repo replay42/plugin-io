@@ -79,7 +79,16 @@ class CountryService
 
         /** @var WebshopCountryRepositoryContract $countryRepository */
         $countryRepository = pluginApp(WebshopCountryRepositoryContract::class);
-        return $countryRepository->getActiveCountriesList($lang);
+        $countryList = $countryRepository->getActiveCountriesList($lang);
+
+        $compareFunction = function ($a, $b) {
+            $aName = str_replace(["Ä", "ä", "Ö", "ö", "Ü", "ü", "ß"], ["Ae", "ae", "Oe", "oe", "Ue", "ue", "ss"], $a['currLangName']);
+            $bName = str_replace(["Ä", "ä", "Ö", "ö", "Ü", "ü", "ß"], ["Ae", "ae", "Oe", "oe", "Ue", "ue", "ss"], $b['currLangName']);
+            return strcmp(strtolower($aName), strtolower($bName));
+        };
+
+        usort($countryList, $compareFunction);
+        return $countryList;
     }
 
     /**
