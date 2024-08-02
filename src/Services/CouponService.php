@@ -51,6 +51,8 @@ class CouponService
     const BELOW_MINIMAL_ORDER_VALUE = 301;
     const NO_VALID_ITEM_IN_BASKET = 302;
 
+    const ALLOWED_SHIPPING_COUNTRIES = [1, 2];
+
     /**
      * CouponService constructor.
      * @param CouponCampaignRepositoryContract $couponCampaignRepository
@@ -79,29 +81,27 @@ class CouponService
     public function setCoupon(string $couponCode)
     {
         // June 23rd, 2023 / RS BK
-        $shippingCountryId = 1;
         $basket = $this->basketRepository->load();
         $campaign = $this->couponCampaignRepository->findByCouponCode($couponCode);
 
         if(!is_null($basket))
             $shippingCountryId = $basket->shippingCountryId;
         
-
-
         $this->getLogger(__CLASS__)->error(
             'DEBUG_SET_COUPON_2',
             [
                 'basket' => $basket,
-                'shippingCountryId' => $basket->shippingCountryId,
+                'basketShippingCountryId' => $shippingCountryId,
+                'allowedShippingCountryIds' => $allowedShippingCountryIds,
                 'campaign' => $campaign,
                 'deniedDiscountType' => CouponCampaign::DISCOUNT_TYPE_SHIPPING
             ]
         );
         if ($campaign instanceof CouponCampaign) {
-            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && $shippingCountryId != 1) {
+            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && !in_array($shippingCountryId, self::ALLOWED_SHIPPING_COUNTRIES)) {
                 // free intl. shipping
                 // not allowed - remove coupon!
-                throw new \Exception("Shipping discount only possible with German delivery address.");
+                throw new \Exception("Shipping discount only possible with German or Austrian delivery address.");
             }
         }
         // ./
@@ -146,7 +146,7 @@ class CouponService
                 $basket['couponCampaignType'] = $campaign->couponType;
             }
 
-            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && $basket['shippingCountryId'] != 1
+            if ($campaign->discountType == CouponCampaign::DISCOUNT_TYPE_SHIPPING && !in_array($basket['shippingCountryId'], self::ALLOWED_SHIPPING_COUNTRIES)
             ) {
                 // free intl. shipping, not allowed, remove coupon!
                 $basket = $this->basketRepository->removeCouponCode()->toArray();

@@ -1,4 +1,4 @@
-plentymarkets IO
+ plentymarkets IO
 
 Copyright © 2017 plentysystems AG
 
