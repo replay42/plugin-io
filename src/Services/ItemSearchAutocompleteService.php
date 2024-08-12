@@ -128,7 +128,8 @@ class ItemSearchAutocompleteService
         $newResult = [
             'item' => $this->getItems($itemSearchResult['items']['documents']),
             'category' => $this->getCategories($itemSearchResult['items']['categories.all']),
-            'suggestion' => $this->getSuggestions($itemSearchResult['suggestions']['searchSuggestions'])
+            'suggestion' => $this->getSuggestions($itemSearchResult['suggestions']['searchSuggestions']),
+            'rawData' => $itemSearchResult
         ];
 
         return $newResult;
@@ -209,6 +210,9 @@ class ItemSearchAutocompleteService
         /** @var CategoryService $categoryService */
         $categoryService = pluginApp(CategoryService::class);
 
+        /** @var TagService $categoryService */
+        $tagService = pluginApp(TagService::class);
+
         if (is_array($categories) && count($categories)) {
             foreach ($categories as $categoryId => $count) {
                 if ((int)$categoryId > 0) {
@@ -218,7 +222,14 @@ class ItemSearchAutocompleteService
                         $this->localizationRepository->getLanguage()
                     );
 
-                    if (!is_null($categoryData) && $categoryService->isVisibleForWebstore(
+                    $categoryTags = $tagService->getTagRelations($categoryId, 'category');
+
+                    // tag 156 = Suche: Anzeuigen, given to a category to show in autocomplete search suggestions
+                    $shouldBeDisplayed = count(array_filter($categoryTags, fn($tag) => $tag->tagId == 156)) > 0; 
+
+                    if (!is_null($categoryData) 
+                        && $shouldBeDisplayed // check if tag is present
+                        && $categoryService->isVisibleForWebstore(
                             $categoryData,
                             Utils::getWebstoreId(),
                             $this->localizationRepository->getLanguage()
@@ -235,7 +246,8 @@ class ItemSearchAutocompleteService
                             ),
                             $this->getCategoryBranch($categoryData->id),
                             '',
-                            $count
+                            $count,
+                            $categoryTags // Other
                         );
                     }
                 }
@@ -276,7 +288,7 @@ class ItemSearchAutocompleteService
      * @param int $count
      * @return array
      */
-    private function buildResult($label, $image, $url, $beforeLabel, $afterLabel, $count)
+    private function buildResult($label, $image, $url, $beforeLabel, $afterLabel, $count, $other = null)
     {
         return [
             'label' => $label,
@@ -284,7 +296,8 @@ class ItemSearchAutocompleteService
             'url' => $url,
             'beforeLabel' => $beforeLabel,
             'afterLabel' => $afterLabel,
-            'count' => $count
+            'count' => $count,
+            'tags' => $other
         ];
     }
 
