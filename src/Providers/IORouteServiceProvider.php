@@ -352,8 +352,11 @@ class IORouteServiceProvider extends RouteServiceProvider
             'IO\Controllers\ItemWishListController@redirect'
         );
         // Custom Wunschliste
-        $router->get('wishlist/{wishlistId}', 'IO\Controllers\ItemWishListController@showWishListDetail')->where('wishlistId', '[0-9]+');
+        $router->get('wunschliste/', 'IO\Controllers\ItemWishListController@showWishList');
         $router->get('wunschliste/{accessCode}', 'IO\Controllers\ItemWishListController@showWishListByAccessCode');
+        
+        // deprecated / not in use anymore!
+        $router->get('wishlist/{wishlistId}', 'IO\Controllers\ItemWishListController@showWishListDetail')->where('wishlistId', '[0-9]+');
 
         // ITEM ROUTES
         if (RouteConfig::isActive(RouteConfig::ITEM)) {
