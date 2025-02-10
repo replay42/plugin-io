@@ -38,6 +38,7 @@ use IO\Services\UnitService;
 use IO\Services\UrlService;
 use IO\Services\UserDataHashService;
 use IO\Services\WebstoreConfigurationService;
+use IO\Services\ShopBuilderService;
 use Plenty\Modules\Webshop\Contracts\LocalizationRepositoryContract;
 use Plenty\Modules\Webshop\Contracts\SessionStorageRepositoryContract;
 use Plenty\Modules\Webshop\Contracts\WebstoreConfigurationRepositoryContract;
@@ -237,5 +238,9 @@ class TwigServiceContainer
     public function getShipping(): ShippingService
     {
         return pluginApp(ShippingService::class);
+    }
+    public function getShopBuilder(): ShopBuilderService
+    {
+        return pluginApp(ShopBuilderService::class);
     }
 }

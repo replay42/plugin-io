@@ -67,6 +67,7 @@ class IORouteServiceProvider extends RouteServiceProvider
             $api->get('io/categorytree/children', 'CategoryTreeResource@getChildren');
             $api->get('io/categorytree/template_for_children', 'CategoryTreeResource@getTemplateForChildren');
             $api->resource('io/categorytree', 'CategoryTreeResource');
+            $api->resource('io/shopbuilder', 'ShopBuilderResource');
             $api->get('io/session', 'SessionResource@index');
         });
 
